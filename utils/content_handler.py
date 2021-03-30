@@ -54,8 +54,7 @@ class NotesRemover(AbstractHandler):
         li = []
         for line in s.split(line_sep):
             pos = line.find('//')
-            if pos >= 0:
-                li.append(line[:pos])
+            li.append(line if pos < 0 else line[:pos])
         return line_sep.join(li)
 
     def process(self, pre_handled_content: str) -> str:
@@ -67,5 +66,10 @@ class NotesRemover(AbstractHandler):
 
 class ZoneCompressor(AbstractHandler):
     def process(self, pre_handled_content: str) -> str:
-        pass
-    
+        line_sep = os.linesep
+        li = []
+        for line in pre_handled_content.split(line_sep):
+            line = line.strip()
+            if line:
+                li.append(line)
+        return line_sep.join(li)
