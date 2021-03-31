@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from .content_handler import Handler, DoNothing, AbstractHandler
 import os
 import re
+from utils.file_helper import filepath_ends_in
 
 
 class FuncExtractor(ABC):
@@ -46,12 +47,14 @@ class ClangFuncExtractor(FuncExtractor):
         re.RegexFlag.MULTILINE | re.RegexFlag.DOTALL
     )
 
+    VALID_FILE_SUFFIX = ['.c', '.h']
+
     def __init__(self, handler: Handler = DoNothing(), encoding: str = 'utf-8'):
         self._handler = self.__SimpleIncludeDefineRemover(handler)
         self._encoding = encoding
 
     def _get_content(self, filepath: str) -> str:
-        with open(filepath, 'r', encoding=self._encoding) as f:
+        with open(filepath, 'r', encoding=self._encoding, newline=os.linesep) as f:
             return f.read()
 
     def set_encoding(self, encoding: str):
@@ -62,6 +65,10 @@ class ClangFuncExtractor(FuncExtractor):
         return len(matcher) > 0
 
     def extract(self, filepath: str) -> list:
+        if not filepath_ends_in(filepath, self.VALID_FILE_SUFFIX):
+            raise RuntimeError('The file path %s is not a valid path, it should end with one of %s' %
+                               (filepath, self.VALID_FILE_SUFFIX))
+
         content = self._get_content(filepath)
         handled_content = self._handler.handle(content)
         mutable_content = handled_content
