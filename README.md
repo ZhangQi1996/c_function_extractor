@@ -24,10 +24,11 @@ optional arguments:
 ```
 
 #### Basic steps in extraction
-1. get all files to specified input filepaths or dir path
+1. get all files from specified input filepaths or dir path
 2. filter all files ending in (.c, .h)
 3. do a function-extraction to per clang source file.
     1. remove all notes.
     2. remove all macro definitions.
     3. extract all function existing in the source file by using specified regulation, 
         and strip all empty spaces surrounding the function.
+    4. store per function-extracted into different file.
