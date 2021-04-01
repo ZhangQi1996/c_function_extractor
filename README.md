@@ -1,5 +1,5 @@
-### Clang Function Extractor
-Introduction: this tool is used mainly to extract all single functions under specified 
+### Clang Function Extractor/Retriever
+Introduction: this tool is used mainly to extract/retrieve all single functions under specified 
 input-filepath or input-dirpath, and stores per function extracted into the single file under specified output dir.
 
 #### Basic Usage
