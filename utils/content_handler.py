@@ -65,6 +65,7 @@ class NotesRemover(AbstractHandler):
 
 
 class ZoneCompressor(AbstractHandler):
+    """Just remove all whitespaces around per line."""
     def process(self, pre_handled_content: str) -> str:
         line_sep = os.linesep
         li = []
@@ -73,3 +74,11 @@ class ZoneCompressor(AbstractHandler):
             if line:
                 li.append(line)
         return line_sep.join(li)
+
+
+class ClangFuncAbstractHandler(AbstractHandler):
+    """
+    abstract handle
+    """
+    def process(self, pre_handled_content: str) -> str:
+        pass

@@ -33,8 +33,7 @@ def create_dir_if_not_exists(dir: str):
 
 
 def generate_func_extracted_filename(original_filepath: str, i: int) -> str:
-    filepath = original_filepath.replace(os.sep, '-').replace('.', '_')
-    return filepath + '_' + str(i) + '.c'
+    return original_filepath.split(os.sep)[-1] + '_func%s' % i + '.c'
 
 
 def check_args(args):
@@ -89,7 +88,9 @@ if __name__ == '__main__':
         funcs_extracted = func_extractor.extract(filepath)
         for j, func_extracted in enumerate(funcs_extracted):
             func_extracted_filename = generate_func_extracted_filename(filepath, j)
+            print(output_dir)
             output_file_path = os.path.join(output_dir, func_extracted_filename)
+            print(output_file_path)
             with open(file=output_file_path, mode='w', encoding=ENCODING, newline=os.linesep) as f:
                 f.write(func_extracted)
         logging.info('Current progress is %s%%', 100.0 * (i + 1) / len(in_files))

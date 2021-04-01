@@ -3,6 +3,7 @@ from .content_handler import Handler, DoNothing, AbstractHandler
 import os
 import re
 from utils.file_helper import filepath_ends_in
+from utils import Stack
 
 
 class FuncExtractor(ABC):
@@ -12,25 +13,7 @@ class FuncExtractor(ABC):
 
 
 class ClangFuncExtractor(FuncExtractor):
-    class __Stack(object):
-        def __init__(self):
-            self.li = []
-
-        def empty(self):
-            return len(self.li) == 0
-
-        def push(self, o):
-            self.li.append(o)
-
-        def pop(self):
-            return self.li.pop(-1)
-
-        def peek(self):
-            return self.li[-1]
-
-        def clear(self):
-            self.li.clear()
-
+    """A function extractor supporting c language."""
     class __SimpleIncludeDefineRemover(AbstractHandler):
 
         def process(self, pre_handled_content: str) -> str:
@@ -81,7 +64,7 @@ class ClangFuncExtractor(FuncExtractor):
 
             header = mutable_content[:left_brace_pos]
             body = mutable_content[left_brace_pos:]
-            st = self.__Stack()
+            st = Stack()
             start_idx, end_idx = 0, 0
             for i, c in enumerate(body):
                 if c == '{':
