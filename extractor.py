@@ -1,5 +1,6 @@
 import argparse
 import logging
+from utils import VALID_FILE_SUFFIX
 from utils.content_handler import NotesRemover
 from utils.func_extractor import ClangFuncExtractor
 from utils.file_helper import get_all_file_paths, filepath_ends_in, del_dir_tree
@@ -78,7 +79,7 @@ if __name__ == '__main__':
     _ = in_files
     in_files = []
     for filepath in _:
-        if filepath_ends_in(filepath, ClangFuncExtractor.VALID_FILE_SUFFIX):
+        if filepath_ends_in(filepath, VALID_FILE_SUFFIX):
             in_files.append(filepath)
     logging.info('After removing all not ending with specified suffix filepath, '
                  '%s clang file in total and removed %s' % (len(in_files), len(_) - len(in_files)))
@@ -88,9 +89,7 @@ if __name__ == '__main__':
         funcs_extracted = func_extractor.extract(filepath)
         for j, func_extracted in enumerate(funcs_extracted):
             func_extracted_filename = generate_func_extracted_filename(filepath, j)
-            print(output_dir)
             output_file_path = os.path.join(output_dir, func_extracted_filename)
-            print(output_file_path)
             with open(file=output_file_path, mode='w', encoding=ENCODING, newline=os.linesep) as f:
                 f.write(func_extracted)
         logging.info('Current progress is %s%%', 100.0 * (i + 1) / len(in_files))

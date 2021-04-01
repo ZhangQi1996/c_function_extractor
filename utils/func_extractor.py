@@ -1,9 +1,9 @@
-from abc import ABC, abstractmethod
-from .content_handler import Handler, DoNothing, AbstractHandler
 import os
-import re
+from abc import ABC, abstractmethod
+
+from utils import Stack, VALID_FILE_SUFFIX, _check_func_header_valid
 from utils.file_helper import filepath_ends_in
-from utils import Stack
+from .content_handler import Handler, DoNothing, AbstractHandler
 
 
 class FuncExtractor(ABC):
@@ -14,9 +14,10 @@ class FuncExtractor(ABC):
 
 class ClangFuncExtractor(FuncExtractor):
     """A function extractor supporting c language."""
+
     class __SimpleIncludeDefineRemover(AbstractHandler):
 
-        def process(self, pre_handled_content: str) -> str:
+        def _process(self, pre_handled_content: str) -> str:
             linesep = os.linesep
             ret = []
             for line in pre_handled_content.split(linesep):
@@ -25,16 +26,10 @@ class ClangFuncExtractor(FuncExtractor):
                     ret.append(line)
             return linesep.join(ret)
 
-    FUNC_HEADER_PATTERN = re.compile(
-        '[a-zA-Z0-9_$,\\*&\\[\\]]+\\s+[a-zA-Z0-9_$,\\*&\\[\\]]+\\s*\\([a-zA-Z0-9_$,\\*&\\[\\]\\s]*\\)\\s+$',
-        re.RegexFlag.MULTILINE | re.RegexFlag.DOTALL
-    )
-
-    VALID_FILE_SUFFIX = ['.c', '.h']
-
     def __init__(self, handler: Handler = DoNothing(), encoding: str = 'utf-8'):
         self._handler = self.__SimpleIncludeDefineRemover(handler)
         self._encoding = encoding
+        self.__st = Stack()
 
     def _get_content(self, filepath: str) -> str:
         with open(filepath, 'r', encoding=self._encoding, newline=os.linesep) as f:
@@ -43,19 +38,16 @@ class ClangFuncExtractor(FuncExtractor):
     def set_encoding(self, encoding: str):
         self._encoding = encoding
 
-    def _check_func_header_valid(self, s: str):
-        matcher = self.FUNC_HEADER_PATTERN.findall(s)
-        return len(matcher) > 0
-
     def extract(self, filepath: str) -> list:
-        if not filepath_ends_in(filepath, self.VALID_FILE_SUFFIX):
+        if not filepath_ends_in(filepath, VALID_FILE_SUFFIX):
             raise RuntimeError('The file path %s is not a valid path, it should end with one of %s' %
-                               (filepath, self.VALID_FILE_SUFFIX))
+                               (filepath, VALID_FILE_SUFFIX))
 
         content = self._get_content(filepath)
         handled_content = self._handler.handle(content)
         mutable_content = handled_content
         ret = []
+        st = self.__st
 
         while True:
             left_brace_pos = mutable_content.find('{')
@@ -64,7 +56,7 @@ class ClangFuncExtractor(FuncExtractor):
 
             header = mutable_content[:left_brace_pos]
             body = mutable_content[left_brace_pos:]
-            st = Stack()
+            st.clear()
             start_idx, end_idx = 0, 0
             for i, c in enumerate(body):
                 if c == '{':
@@ -76,7 +68,7 @@ class ClangFuncExtractor(FuncExtractor):
                     if st.empty():
                         end_idx = i
                         break
-            if self._check_func_header_valid(header):
+            if _check_func_header_valid(header):
                 pos = header.rfind(';')
                 func_header = header[(pos + 1):] if pos >= 0 else header
                 func_body = body[start_idx: (end_idx + 1)]
