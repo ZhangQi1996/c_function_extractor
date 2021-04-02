@@ -9,7 +9,7 @@ usage: extractor.py [-h] [-f [INPUT_FILE [INPUT_FILE ...]]] [-d [INPUT_DIR]]
                     [-D OUTPUT_DIR] [--clear_output_dir] [-a]
                     [--alv ABSTRACTION_LEVEL] [-N]
 
-A extractor used to extract all clang functions in specified file dir or c/cpp
+A extractor used to extract all clang functions in specified file dir or .c/.h
 files.
 
 optional arguments:

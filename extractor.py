@@ -10,7 +10,7 @@ import os
 
 def generate_args():
     parser = argparse.ArgumentParser(
-        description='A extractor used to extract all clang functions in specified file dir or c/cpp files.')
+        description='A extractor used to extract all clang functions in specified file dir or .c/.h files.')
     parser.add_argument('-f', '--input_files', dest='input_files', metavar='INPUT_FILE', nargs='*',
                         help='Specifies which files will be used to extract.')
     parser.add_argument('-d', '--input_dir', dest='input_dir', metavar='INPUT_DIR', nargs='?',
