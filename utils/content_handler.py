@@ -228,4 +228,4 @@ class ClangFuncNormalizer(AbstractHandler):
                 return ClangFuncNormalizer.PLACEHOLDER
             else:
                 return ''
-        return self.PATTERN.sub(replace_, func_content)
+        return self.PATTERN.sub(replace_, func_content).lower()
