@@ -1,6 +1,7 @@
 import os
 import re
 from abc import ABC, abstractmethod
+
 from utils import FUNC_HEADER_PATTERN, DEFINED_NAME_PATTERN
 
 
@@ -127,6 +128,8 @@ class _Level1(AbstractHandler):
         params_content = matcher.group(1).strip()
         for param_content in params_content.split(','):
             param_content_reversed = param_content.strip()[::-1]
+            if len(param_content_reversed) == 0:
+                continue
             matcher = DEFINED_NAME_PATTERN.search(param_content_reversed)
             candidate = matcher.group(1)[::-1]
             pre_handled_content = replace(pre_handled_content, candidate, self.TAG)
@@ -210,5 +213,19 @@ class ClangFuncAbstractHandler(AbstractHandler):
 
 
 class ClangFuncNormalizer(AbstractHandler):
+    # used to reduce redundant whitespaces
+    PATTERN = re.compile('\\s+', re.RegexFlag.MULTILINE)
+    PLACEHOLDER = ' '
+
     def _process(self, pre_handled_content: str) -> str:
-        pass
+        func_content = self.PATTERN.sub(self.PLACEHOLDER, pre_handled_content)
+
+        def replace_(group_):
+            span = group_.span()
+            l = func_content[span[0] - 1]
+            r = func_content[span[1]]
+            if DEFINED_NAME_PATTERN.match(l) is not None and DEFINED_NAME_PATTERN.match(r) is not None:
+                return ClangFuncNormalizer.PLACEHOLDER
+            else:
+                return ''
+        return self.PATTERN.sub(replace_, func_content)

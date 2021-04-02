@@ -1,7 +1,7 @@
 import argparse
 import logging
 from utils import VALID_FILE_SUFFIX
-from utils.content_handler import NotesRemover
+from utils.content_handler import NotesRemover, ClangFuncAbstractHandler, ClangFuncNormalizer, DoNothing
 from utils.func_extractor import ClangFuncExtractor
 from utils.file_helper import get_all_file_paths, filepath_ends_in, del_dir_tree
 from conf import ENCODING
@@ -19,6 +19,13 @@ def generate_args():
                         help='Specifies the dir at which all extracted results would be stored.')
     parser.add_argument('--clear_output_dir', dest='clear_output_dir', action='store_true',
                         help='Means if clear all files under output dir before extract.')
+    parser.add_argument('-a', dest='use_abstraction', action='store_true',
+                        help='Abstract the function result extracted use the specified abstraction level, default lv3.')
+    parser.add_argument('--alv', dest='abstraction_level', type=int, default=3,
+                        help='Specify abstraction level, default lv3.')
+    parser.add_argument('-N', dest='use_normalization', action='store_true',
+                        help='Normalize the function result extracted.')
+
     return parser.parse_args()
 
 
@@ -68,7 +75,17 @@ if __name__ == '__main__':
     input_dir = args.input_dir
     output_dir = args.output_dir
 
+    use_abstraction = args.use_abstraction
+    abstraction_level = args.abstraction_level
+    use_normalization = args.use_normalization
+
     func_extractor = ClangFuncExtractor(NotesRemover(), encoding=ENCODING)
+    func_handler = DoNothing()
+    if use_abstraction:
+        func_handler = ClangFuncAbstractHandler(level=abstraction_level, handler=func_handler)
+    if use_normalization:
+        func_handler = ClangFuncNormalizer(handler=func_handler)
+
     in_files = []
     if input_files is not None:
         in_files = input_files
@@ -88,6 +105,7 @@ if __name__ == '__main__':
     for i, filepath in enumerate(in_files):
         funcs_extracted = func_extractor.extract(filepath)
         for j, func_extracted in enumerate(funcs_extracted):
+            func_extracted = func_handler.handle(func_extracted)
             func_extracted_filename = generate_func_extracted_filename(filepath, j)
             output_file_path = os.path.join(output_dir, func_extracted_filename)
             with open(file=output_file_path, mode='w', encoding=ENCODING, newline=os.linesep) as f:

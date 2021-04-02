@@ -11,7 +11,7 @@ DEFINED_NAME_PATTERN = re.compile(
 )
 
 FUNC_HEADER_PATTERN = re.compile(
-    '[a-zA-Z0-9_$,\\*&\\[\\]]+\\s+[a-zA-Z0-9_$]+\\s*\\(([a-zA-Z0-9_$,\\*&\\[\\]\\s]*)\\)\\s*$',
+    '[a-zA-Z0-9_$,\\*&\\[\\]]+\\s+[a-zA-Z0-9_$\\*]+\\s*\\(([a-zA-Z0-9_$,\\*&\\[\\]\\s]*)\\)\\s*$',
     re.RegexFlag.MULTILINE | re.RegexFlag.DOTALL
 )
 
